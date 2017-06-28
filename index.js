@@ -82,7 +82,7 @@ async function upload(filePath) {
 const App = new Koa();
 
 router
-    .post('/render', async(ctx) => {
+    .post('/render', async (ctx) => {
         if (!ctx.request.body.url && !ctx.request.body.html) return ctx.body = {
             success: false,
             msg: 'url or html is required'
