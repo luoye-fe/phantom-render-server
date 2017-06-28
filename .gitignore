@@ -16,4 +16,6 @@ yarn-error.log*
 # project
 screenshot/
 !screenshot/.gitkeep
+html-temp/
+!html-temp/.gitkeep
 config.js

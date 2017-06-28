@@ -1,8 +1,10 @@
+const fs = require('fs');
 const phantom = require('phantom');
 
 const Koa = require('koa');
 const router = require('koa-router')();
-const cors = require('kcors');
+const cors = require('koa2-cors');
+const bodyParser = require('koa-bodyparser');
 
 const qiniu = require('qiniu');
 
@@ -18,23 +20,35 @@ async function genInstance() {
     return await phantom.create();
 }
 
+async function writeFile(path, data) {
+    return new Promise((resolve, reject) => {
+        fs.writeFile(path, data, (e) => {
+            if (e) return reject(e);
+            resolve();
+        });
+    });
+}
+
 async function render(options) {
     if (!options.url && !options.html) return null;
     const time = Date.now();
     const fileName = 'img-' + time + '.' + (options.format || 'jpeg');
+    const htmlTempPath = './html-temp/' + time + '.html';
     try {
         const instance = await genInstance();
         const page = await instance.createPage();
         if (options.url) {
             await page.open(options.url);
         } else {
-            page.property('content', options.html);
+            await writeFile(htmlTempPath, options.html);
+            await page.open(htmlTempPath);
         }
         page.property('viewportSize', {
             width: options.width || '',
             height: options.height || ''
         });
         await page.render('./screenshot/' + fileName, { format: options.format || 'jpeg', quality: (options.format === 'png' || options.format === 'jpeg') ? (options.quality || '60') : '' });
+        fs.unlink(htmlTempPath, () => {});
     } catch (e) {
         console.error(e);
     }
@@ -68,12 +82,12 @@ async function upload(filePath) {
 const App = new Koa();
 
 router
-    .get('/render', async(ctx) => {
-        if (!ctx.query.url && !ctx.query.html) return ctx.body = {
+    .post('/render', async(ctx) => {
+        if (!ctx.request.body.url && !ctx.request.body.html) return ctx.body = {
             success: false,
             msg: 'url or html is required'
         };
-        const fileName = await render(ctx.query);
+        const fileName = await render(ctx.request.body);
         const url = await upload('./screenshot/' + fileName);
         ctx.body = {
             success: true,
@@ -86,9 +100,14 @@ router
     });
 
 App
-    .use(cors())
+    .use(cors({
+        origin: '*',
+        allowMethods: ['GET', 'POST', 'DELETE']
+    }))
+    .use(bodyParser())
     .use(router.routes())
-    .use(router.allowedMethods());
+    .use(router.allowedMethods())
+    
 
 App.listen(_config.port);
 console.log('Server listen on port: ' + _config.port);
