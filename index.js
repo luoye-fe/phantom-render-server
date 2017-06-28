@@ -86,9 +86,9 @@ router
     });
 
 App
+    .use(cors())
     .use(router.routes())
-    .use(router.allowedMethods())
-    .use(cors());
+    .use(router.allowedMethods());
 
 App.listen(_config.port);
 console.log('Server listen on port: ' + _config.port);
