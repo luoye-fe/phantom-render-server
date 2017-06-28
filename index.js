@@ -2,6 +2,7 @@ const phantom = require('phantom');
 
 const Koa = require('koa');
 const router = require('koa-router')();
+const cors = require('kcors');
 
 const qiniu = require('qiniu');
 
@@ -86,7 +87,8 @@ router
 
 App
     .use(router.routes())
-    .use(router.allowedMethods());
+    .use(router.allowedMethods())
+    .use(cors());
 
 App.listen(_config.port);
 console.log('Server listen on port: ' + _config.port);
