@@ -13,7 +13,7 @@ phantom render server
 
 * html
 
-	render html code (`url`优先)
+	render html code (`url` first)
 
 * width
 
