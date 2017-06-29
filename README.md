@@ -3,7 +3,7 @@ phantom render server
 
 `http://api.luoyefe.com/phantom/render`
 
-`get`
+`post`
 
 ### options
 
