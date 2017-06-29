@@ -17,7 +17,8 @@ let phantomInstance = null;
 
 async function genInstance() {
     if (phantomInstance) return phantomInstance;
-    return await phantom.create();
+    phantomInstance = await phantom.create();
+    return phantomInstance;
 }
 
 async function writeFile(path, data) {
